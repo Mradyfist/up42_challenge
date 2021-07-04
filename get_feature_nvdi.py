@@ -50,6 +50,10 @@ if __name__ == "__main__":
         images_red.append(item.asset('red')['href'])
         images_nir.append(item.asset('nir')['href'])
 
+        # checking to make sure we're using correct bands
+        print(item.asset('nir'))
+        print(item.asset('red'))
+
     print(images_red)
     print(images_nir)
 
@@ -57,9 +61,9 @@ if __name__ == "__main__":
         with rasterio.open(image) as im_red:
             with rasterio.open(images_nir[index]) as im_nir:
 
-
-                im_red_chunk = im_red.read()
-                im_nir_chunk = im_nir.read()
+                # adding clip to eliminate negative values, to see if that's my normalization issue
+                im_red_chunk = im_red.read().clip(0)
+                im_nir_chunk = im_nir.read().clip(0)
 
                 ndvi = calc_ndvi(im_nir_chunk, im_red_chunk, 0.001)
                 #print(ndvi)
