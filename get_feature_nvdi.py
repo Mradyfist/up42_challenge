@@ -28,6 +28,8 @@ def query_element84(api_endpoint, geofeature):
 if __name__ == "__main__":
 
     stac_api_endpoint = "https://earth-search.aws.element84.com/v0"
+    images_red = []
+    images_nir = []
 
 
     geo_feature_coords = get_geo_feature()['features'][0]['geometry']
@@ -35,4 +37,9 @@ if __name__ == "__main__":
     #print(geo_feature['features'][0]['geometry'])
 
     results = query_element84(stac_api_endpoint, geo_feature_coords)
-    print(results.found())
+    for item in results.items():
+        images_red.append(item.asset('red')['href'])
+        images_nir.append(item.asset('nir')['href'])
+
+    print(images_red)
+    print(images_nir)
