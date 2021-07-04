@@ -55,5 +55,7 @@ if __name__ == "__main__":
                 im_red_chunk = im_red.read()
                 im_nir_chunk = im_nir.read()
 
-                NDVI = (im_nir_chunk - im_red_chunk) / (im_nir_chunk + im_red_chunk + 0.001)
-                print(NDVI)
+                ndvi = (im_nir_chunk - im_red_chunk) / (im_nir_chunk + im_red_chunk + 0.001)
+                #print(ndvi)
+                mean_ndvi = ndvi.mean()
+                print(mean_ndvi)
