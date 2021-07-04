@@ -23,7 +23,7 @@ def get_geo_feature():
 
 # Query STAC with our geofeature coords
 def query_element84(api_endpoint, geofeature):
-    search = Search(api_endpoint, intersects=geofeature, datetime='2021-06-01/2021-06-30', collections=['sentinel-s2-l2a-cogs'])
+    search = Search(api_endpoint, intersects=geofeature, datetime='2021-06-20/2021-06-30', collections=['sentinel-s2-l2a-cogs'])
     return search
 
 def calc_ndvi(nir, red, offset):
@@ -35,6 +35,9 @@ if __name__ == "__main__":
     stac_api_endpoint = "https://earth-search.aws.element84.com/v0"
     images_red = []
     images_nir = []
+
+    # List where we can keep ndvi means as we calculate them per chunk
+    per_chunk_ndvi_means = []
 
 
     geo_feature_coords = get_geo_feature()['features'][0]['geometry']
@@ -62,3 +65,7 @@ if __name__ == "__main__":
                 #print(ndvi)
                 mean_ndvi = ndvi.mean()
                 print(mean_ndvi)
+                per_chunk_ndvi_means.append(mean_ndvi)
+    area_ndvi_mean = sum(per_chunk_ndvi_means) / len(per_chunk_ndvi_means)
+
+    print(f"The mean NDVI for the given area is {area_ndvi_mean}")
