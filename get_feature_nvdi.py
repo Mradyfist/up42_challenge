@@ -26,6 +26,8 @@ def query_element84(api_endpoint, geofeature):
     search = Search(api_endpoint, intersects=geofeature, datetime='2021-06-01/2021-06-30', collections=['sentinel-s2-l2a-cogs'])
     return search
 
+def calc_ndvi(nir, red, offset):
+    return (nir - red) / (nir + red + offset)
 
 #print(geojson_feature.json())
 if __name__ == "__main__":
@@ -40,6 +42,7 @@ if __name__ == "__main__":
     #print(geo_feature['features'][0]['geometry'])
 
     results = query_element84(stac_api_endpoint, geo_feature_coords)
+
     for item in results.items():
         images_red.append(item.asset('red')['href'])
         images_nir.append(item.asset('nir')['href'])
@@ -55,7 +58,7 @@ if __name__ == "__main__":
                 im_red_chunk = im_red.read()
                 im_nir_chunk = im_nir.read()
 
-                ndvi = (im_nir_chunk - im_red_chunk) / (im_nir_chunk + im_red_chunk + 0.001)
+                ndvi = calc_ndvi(im_nir_chunk, im_red_chunk, 0.001)
                 #print(ndvi)
                 mean_ndvi = ndvi.mean()
                 print(mean_ndvi)
