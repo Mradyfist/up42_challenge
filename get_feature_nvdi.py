@@ -2,7 +2,10 @@ import requests
 import json
 import os
 from satsearch import Search
-
+import numpy as np
+import cv2
+from osgeo import gdal
+import rasterio
 
 
 # Get the described feature as the default, or whatever is passed as an arg
@@ -43,3 +46,14 @@ if __name__ == "__main__":
 
     print(images_red)
     print(images_nir)
+
+    for index, image in enumerate(images_red):
+        with rasterio.open(image) as im_red:
+            with rasterio.open(images_nir[index]) as im_nir:
+
+
+                im_red_chunk = im_red.read()
+                im_nir_chunk = im_nir.read()
+
+                NDVI = (im_nir_chunk - im_red_chunk) / (im_nir_chunk + im_red_chunk + 0.001)
+                print(NDVI)
