@@ -1,6 +1,8 @@
 import requests
 import json
 import os
+from satsearch import Search
+
 
 
 # Get the described feature as the default, or whatever is passed as an arg
@@ -12,9 +14,18 @@ def get_geo_feature():
 
     return geojson_feature.json()
 
-#def query_element84():
+def query_element84(api_endpoint, geofeature):
+    search = Search(api_endpoint, intersects=geofeature)
+    return search
 
 
 #print(geojson_feature.json())
 if __name__ == "__main__":
+
+    stac_api_endpoint = "https://earth-search.aws.element84.com/v0"
+
+
     geo_feature = get_geo_feature()
+
+    results = query_element84(stac_api_endpoint, geo_feature)
+    print(results)
