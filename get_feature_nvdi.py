@@ -20,7 +20,7 @@ def get_geo_feature():
 
 # Query STAC with our geofeature coords
 def query_element84(api_endpoint, geofeature):
-    search = Search(api_endpoint, intersects=geofeature)
+    search = Search(api_endpoint, intersects=geofeature, datetime='2021-06-01/2021-06-30', collections=['sentinel-s2-l2a-cogs'])
     return search
 
 
