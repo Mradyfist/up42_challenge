@@ -22,8 +22,14 @@ def get_geo_feature():
 
 
 # Query STAC with our geofeature coords
-def query_element84(api_endpoint, geofeature):
-    search = Search(api_endpoint, intersects=geofeature, datetime='2021-06-20/2021-06-30', collections=['sentinel-s2-l2a-cogs'])
+def query_element84(api_endpoint, geofeature, max_cloud_cover):
+    search = Search(api_endpoint, intersects=geofeature, datetime='2021-06-20/2021-06-30', collections=['sentinel-s2-l2a-cogs'], query={'eo:cloud_cover': {'lt': max_cloud_cover}})
+    
+    # quick debug code to see cloud cover from images
+    items = search.items()
+    print(items.summary(['date', 'id', 'eo:cloud_cover']))
+
+
     return search
 
 def calc_ndvi(nir, red, offset):
@@ -44,15 +50,17 @@ if __name__ == "__main__":
 
     #print(geo_feature['features'][0]['geometry'])
 
-    results = query_element84(stac_api_endpoint, geo_feature_coords)
+    results = query_element84(stac_api_endpoint, geo_feature_coords, 10)
+
 
     for item in results.items():
         images_red.append(item.asset('red')['href'])
         images_nir.append(item.asset('nir')['href'])
 
         # checking to make sure we're using correct bands
-        print(item.asset('nir'))
-        print(item.asset('red'))
+        #print(item.asset('nir'))
+        #print(item.asset('red'))
+
 
     print(images_red)
     print(images_nir)
@@ -65,7 +73,7 @@ if __name__ == "__main__":
                 im_red_chunk = im_red.read().clip(0)
                 im_nir_chunk = im_nir.read().clip(0)
 
-                ndvi = calc_ndvi(im_nir_chunk, im_red_chunk, 0.001)
+                ndvi = calc_ndvi(im_nir_chunk, im_red_chunk, 0.000001)
                 #print(ndvi)
                 mean_ndvi = ndvi.mean()
                 print(mean_ndvi)
