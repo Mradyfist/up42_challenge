@@ -48,20 +48,23 @@ if __name__ == "__main__":
 
     geo_feature_coords = get_geo_feature()['features'][0]['geometry']
 
-    #print(geo_feature['features'][0]['geometry'])
 
     results = query_element84(stac_api_endpoint, geo_feature_coords, 0)
-    print(results.items()[0].assets)
     
-    image_ids = set()
+    image_gridsquares = set()
     latest_images = []
 
 
     # iterate through all our images and only include the latest of each id
     for item in results.items():
-        if item['id'] not in image_ids:
-            image_ids.add(item['id'])
+        # Make a string that represents this image's unique location so we can hash it into our set
+        gridsquare = str(item.properties['sentinel:utm_zone']) + str(item.properties['sentinel:latitude_band']) + str(item.properties['sentinel:grid_square'])
+
+        # Check the set and add to latest_images if not already in the set, and since results are returned in descending order from latest we'll have the latest of each
+        if gridsquare not in image_gridsquares:
+            image_gridsquares.add(gridsquare)
             latest_images.append(item)
+            print(image_gridsquares)
 
     for item in latest_images:
         images_red.append(item.asset('red')['href'])
@@ -71,8 +74,6 @@ if __name__ == "__main__":
         #print(item.asset('red'))
 
 
-    print(images_red)
-    print(images_nir)
 
     for index, image in enumerate(images_red):
         with rasterio.open(image) as im_red:
@@ -91,7 +92,7 @@ if __name__ == "__main__":
                 ndvi = calc_ndvi(im_nir_chunk, im_red_chunk, 0.000001)
                 #print(ndvi)
                 mean_ndvi = ndvi.mean()
-                print(f"Red band: {im_red}, NIR band: {im_nir}, mean NDVI: {mean_ndvi}")
+                print(f"Image set {index} - mean NDVI: {mean_ndvi}")
                 per_chunk_ndvi_means.append(mean_ndvi)
     area_ndvi_mean = sum(per_chunk_ndvi_means) / len(per_chunk_ndvi_means)
 
