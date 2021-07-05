@@ -1,1 +1,5 @@
 sat-search
+numpy
+cv2
+gdal
+rasterio
