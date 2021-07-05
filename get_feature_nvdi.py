@@ -23,7 +23,7 @@ def get_geo_feature():
 
 # Query STAC with our geofeature coords
 def query_element84(api_endpoint, geofeature, max_cloud_cover):
-    search = Search(api_endpoint, intersects=geofeature, datetime='2021-06-20/2021-06-30', collections=['sentinel-s2-l2a-cogs'], query={'eo:cloud_cover': {'lt': max_cloud_cover}})
+    search = Search(api_endpoint, intersects=geofeature, datetime='2021-01-01/2021-06-30', collections=['sentinel-s2-l2a-cogs'], query={'eo:cloud_cover': {'lte': max_cloud_cover}})
     
     # quick debug code to see cloud cover from images
     items = search.items()
@@ -50,15 +50,24 @@ if __name__ == "__main__":
 
     #print(geo_feature['features'][0]['geometry'])
 
-    results = query_element84(stac_api_endpoint, geo_feature_coords, 10)
+    results = query_element84(stac_api_endpoint, geo_feature_coords, 0)
+    print(results.items()[0].assets)
+    
+    image_ids = set()
+    latest_images = []
 
 
+    # iterate through all our images and only include the latest of each id
     for item in results.items():
+        if item['id'] not in image_ids:
+            image_ids.add(item['id'])
+            latest_images.append(item)
+
+    for item in latest_images:
         images_red.append(item.asset('red')['href'])
         images_nir.append(item.asset('nir')['href'])
 
         # checking to make sure we're using correct bands
-        #print(item.asset('nir'))
         #print(item.asset('red'))
 
 
@@ -70,13 +79,19 @@ if __name__ == "__main__":
             with rasterio.open(images_nir[index]) as im_nir:
 
                 # adding clip to eliminate negative values, to see if that's my normalization issue
-                im_red_chunk = im_red.read().clip(0)
-                im_nir_chunk = im_nir.read().clip(0)
+                overviews = im_red.overviews(1)
+
+                # select the second-largest resolution
+                overview_selected = overviews[1]
+
+
+                im_red_chunk = im_red.read(out_shape=(1, int(im_red.height // overview_selected), int(im_red.width // overview_selected))).clip(0)
+                im_nir_chunk = im_nir.read(out_shape=(1, int(im_nir.height // overview_selected), int(im_nir.width // overview_selected))).clip(0)
 
                 ndvi = calc_ndvi(im_nir_chunk, im_red_chunk, 0.000001)
                 #print(ndvi)
                 mean_ndvi = ndvi.mean()
-                print(mean_ndvi)
+                print(f"Red band: {im_red}, NIR band: {im_nir}, mean NDVI: {mean_ndvi}")
                 per_chunk_ndvi_means.append(mean_ndvi)
     area_ndvi_mean = sum(per_chunk_ndvi_means) / len(per_chunk_ndvi_means)
 
