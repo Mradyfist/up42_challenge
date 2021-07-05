@@ -12,6 +12,9 @@ import rasterio, rasterio.mask
 # Get the described feature as the default, or whatever is passed as an arg
 def get_geo_feature(feature_url):
 
+    if type(feature_url) not in [str]:
+        raise TypeError('The feature URL passed as a command-line arg must be a string')
+
     try:
         geojson_feature = requests.get(feature_url)
     except:
@@ -22,6 +25,9 @@ def get_geo_feature(feature_url):
     file = open('geojson_tmp/workingfeature.json', "w")
     file.write(geojson_feature.text)
     file.close()
+
+    if type(geojson_feature) not in [dict]:
+        raise TypeError('Did not get a proper response for feature URL')
 
     return geojson_feature.json()
 
@@ -42,7 +48,8 @@ def calc_ndvi(nir, red, offset):
 
     return (nir - red) / (nir + red + offset)
 
-#print(geojson_feature.json())
+#####################################################################################
+
 if __name__ == "__main__":
 
     stac_api_endpoint = "https://earth-search.aws.element84.com/v0"
