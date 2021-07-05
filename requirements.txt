@@ -1,3 +1,4 @@
+requests
 sat-search
 numpy
 cv2
