@@ -52,6 +52,7 @@ if __name__ == "__main__":
     # List where we can keep ndvi means as we calculate them per chunk
     per_chunk_ndvi_means = []
 
+    # feature_url defaults to our Github Gist path, if no argument is given
     feature_url = sys.argv[1] if len(sys.argv) > 1 else 'https://gist.githubusercontent.com/rodrigoalmeida94/369280ddccf97763da54371199a9acea/raw/d18cd1e266023d08464e13bf0e239ee29175e592/doberitzer_heide.geojson'
     geo_feature_coords = get_geo_feature(feature_url)['features'][0]['geometry']
 
